@@ -21,12 +21,14 @@ def train_test_split():
 
 
 class Reader:
-  def __init__(self, list_path, wav_folder, batch_size, length=16000 * 8):
+  def __init__(self, list_path, wav_folder, batch_size, n_seconds=2):
     """
     Parameters
     ----------
     length: Wanted length for each clip.
     """
+    self.sample_rate = 16000
+    self.n_seconds = n_seconds
     with open(list_path) as f:
       self.names = f.read().splitlines()
     self.wav_folder = wav_folder
@@ -39,7 +41,7 @@ class Reader:
         sr=None,
         mono=False
       )
-      data = self.wav_pad_crop(data, length)
+      data = self.wav_pad_crop(data, self.sample_rate * n_seconds)
       self.data.append((name, data))
 
   def wav_pad_crop(self, wav, length):
