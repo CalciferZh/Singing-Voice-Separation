@@ -50,18 +50,21 @@ class Reader:
 
   def next_batch(self):
     batch = random.sample(self.data, self.batch_size)
-    truth = []
-    package = []
+    x = []
+    y1 = []
+    y2 = []
     for sample in batch:
       wav = sample[1]
-      spec_1 = np.abs(librosa.stft(wav[0], n_fft=1024, hop_length=8)).T
-      spec_2 = np.abs(librosa.stft(wav[1], n_fft=1024, hop_length=8)).T
+      spec1 = np.abs(librosa.stft(wav[0], n_fft=1024, hop_length=8)).T
+      spec2 = np.abs(librosa.stft(wav[1], n_fft=1024, hop_length=8)).T
       mixture = np.abs(librosa.stft(librosa.to_mono(wav), n_fft=1024, hop_length=8))
-      truth.append([spec_1, spec_2])
-      package.append(mixture.T)
-    truth = np.array(truth)
-    package = np.array(package)
-    return package, truth
+      y1.append(spec1)
+      y2.append(spec2)
+      x.append(mixture.T)
+    x = np.array(x)
+    y1 = np.array(y1)
+    y2 = np.array(y2)
+    return x, y1, y2
 
 if __name__ == '__main__':
   r = Reader(
