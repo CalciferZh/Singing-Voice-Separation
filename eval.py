@@ -51,12 +51,12 @@ def process_folder(src_path, list_path, output_path, model):
     wav2_pred = librosa.istft((mag2_pred * np.exp(1.j * phs2)).T, hop_length=8)
 
     librosa.output.write_wav(
-      os.path.join(output_path, name.replace('.wav', '_vocal.wav')),
+      os.path.join(output_path, name.replace('.wav', '_accompanies.wav')),
       wav1_pred,
       16000
     )
     librosa.output.write_wav(
-      os.path.join(output_path, name.replace('.wav', '_accompanies.wav')),
+      os.path.join(output_path, name.replace('.wav', '_vocal.wav')),
       wav2_pred,
       16000
     )
