@@ -67,7 +67,7 @@ def process_folder(src_path, list_path, output_path, model):
     )
 
 
-if __name__ == '__main__':
+def process_folder_example():
   model = Model('./log/baseline', baseline_network)
   process_folder(
     './data/wav',
@@ -76,3 +76,42 @@ if __name__ == '__main__':
     model
   )
 
+
+def process_single_file(src_path, out_path_pattern, model):
+  wav, sr = librosa.load(
+    src_path,
+    sr=None,
+    mono=True
+  )
+
+  spec = librosa.stft(wav, n_fft=1024, hop_length=8)
+  mag = np.abs(spec)
+  ang = np.angle(spec)
+  mag1_pred, mag2_pred = model.process(mag.T)
+
+  wav1_pred = librosa.istft(mag1_pred.T * np.exp(1.j * ang), hop_length=8)
+  wav2_pred = librosa.istft(mag2_pred.T * np.exp(1.j * ang), hop_length=8)
+
+  librosa.output.write_wav(
+    os.path.join(out_path_pattern % 'accompanies'),
+    wav1_pred,
+    16000
+  )
+  librosa.output.write_wav(
+    os.path.join(out_path_pattern % 'vocal'),
+    wav2_pred,
+    16000
+  )
+
+
+def process_single_example():
+  model = Model('./log/baseline', baseline_network)
+  process_single_file(
+    './demo.wav',
+    './demo_%s.wav',
+    model
+  )
+
+
+if __name__ == '__main__':
+  process_single_example()
