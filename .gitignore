@@ -1,6 +1,7 @@
 # custom
 data/
 log/
+results/
 .vscode/
 
 # Byte-compiled / optimized / DLL files

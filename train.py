@@ -75,7 +75,7 @@ if __name__ == '__main__':
   )
   train_baseline(
     reader,
-    'baseline_lr1e-5',
+    'baseline',
     './log',
-    0.00001
+    0.0001
   )
