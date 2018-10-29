@@ -1,5 +1,8 @@
 import os
 import random
+import matplotlib.pyplot as plt
+import numpy as np
+import librosa
 
 
 def train_test_split():
@@ -17,5 +20,53 @@ def train_test_split():
       f.write(name + '\n')
 
 
+class Reader:
+  def __init__(self, list_path, wav_folder, batch_size, length=16000 * 8):
+    """
+    Parameters
+    ----------
+    length: Wanted length for each clip.
+    """
+    with open(list_path) as f:
+      self.names = f.read().splitlines()
+    self.wav_folder = wav_folder
+    self.list_path = list_path
+    self.batch_size = batch_size
+    self.data = []
+    for name in self.names:
+      data, _ = librosa.load(
+        os.path.join(self.wav_folder, name),
+        sr=None,
+        mono=False
+      )
+      data = self.wav_pad_crop(data, length)
+      self.data.append((name, data))
+
+  def wav_pad_crop(self, wav, length):
+    while wav.shape[1] < length:
+      wav = np.concatenate([wav, wav], 1)
+    wav = wav[:,:length]
+    return wav
+
+  def next_batch(self):
+    batch = random.sample(self.data, self.batch_size)
+    truth = []
+    package = []
+    for sample in batch:
+      wav = sample[1]
+      spec_1 = np.abs(librosa.stft(wav[0], n_fft=1024, hop_length=8)).T
+      spec_2 = np.abs(librosa.stft(wav[1], n_fft=1024, hop_length=8)).T
+      mixture = np.abs(librosa.stft(librosa.to_mono(wav), n_fft=1024, hop_length=8))
+      truth.append([spec_1, spec_2])
+      package.append(mixture.T)
+    truth = np.array(truth)
+    package = np.array(package)
+    return package, truth
+
 if __name__ == '__main__':
-  train_test_split()
+  r = Reader(
+    './data/train.txt',
+    './data/wav',
+    16
+  )
+  _, _ = r.next_batch()
