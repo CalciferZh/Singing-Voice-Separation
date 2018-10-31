@@ -6,6 +6,7 @@ from tqdm import tqdm
 
 from network import baseline_network
 from utils import *
+from separation import *
 
 
 class Model:
@@ -29,6 +30,10 @@ class Model:
 def process_folder(src_path, list_path, output_path, model):
   with open(list_path) as f:
     names = f.read().splitlines()
+  gnsdr = [0, 0]
+  gsir = [0, 0]
+  gsar = [0, 0]
+  length = 0
   for name in tqdm(names, ncols=100):
     wav, _ = librosa.load(
       os.path.join(src_path, name),
@@ -36,11 +41,9 @@ def process_folder(src_path, list_path, output_path, model):
       mono=False
     )
     src1 = librosa.stft(wav[0], n_fft=1024, hop_length=8).T
-    mag1 = np.abs(src1)
     phs1 = np.angle(src1)
 
     src2 = librosa.stft(wav[1], n_fft=1024, hop_length=8).T
-    mag2 = np.abs(src2)
     phs2 = np.angle(src2)
 
     mixture = librosa.to_mono(wav)
@@ -49,6 +52,18 @@ def process_folder(src_path, list_path, output_path, model):
 
     wav1_pred = librosa.istft((mag1_pred * np.exp(1.j * phs1)).T, hop_length=8)
     wav2_pred = librosa.istft((mag2_pred * np.exp(1.j * phs2)).T, hop_length=8)
+
+    sdr, sir, sar, _ = bss_eval_sources(wav[0], wav1_pred)
+    gnsdr[0] += sdr
+    gsir[0] += sir
+    gsar[0] += sar
+
+    sdr, sir, sar, _ = bss_eval_sources(wav[0], wav1_pred)
+    gnsdr[1] += sdr
+    gsir[1] += sir
+    gsar[1] += sar
+
+    length += wav1_pred.shape[0]
 
     librosa.output.write_wav(
       os.path.join(output_path, name.replace('.wav', '_accompanies.wav')),
@@ -65,6 +80,16 @@ def process_folder(src_path, list_path, output_path, model):
       mixture,
       16000
     )
+
+  for l in [gnsdr, gsir, gsar]:
+    for i in range(2):
+      l[i] /= length
+    l.append((l[0] + l[1]) / 2)
+
+  print('| Type | GNSDR | GSIR | GSAR |')
+  print('| --- | --- | --- | --- |')
+  for i, n in enumerate(['Accompanies', 'Vocal', 'Mean']):
+    print('| %s | %f | %f | %f |' % (n, gnsdr[i], gsir[i], gsar[i]))
 
 
 def process_folder_example():
@@ -83,6 +108,7 @@ def process_single_file(src_path, out_path_pattern, model):
     sr=None,
     mono=True
   )
+  print('sample rate:', sr)
 
   spec = librosa.stft(wav, n_fft=1024, hop_length=8)
   mag = np.abs(spec)
@@ -114,4 +140,4 @@ def process_single_example():
 
 
 if __name__ == '__main__':
-  process_single_example()
+  process_folder_example()
