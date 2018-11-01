@@ -3,10 +3,10 @@ import librosa
 import tensorflow as tf
 import os
 from tqdm import tqdm
+from mir_eval.separation import bss_eval_sources
 
 from network import baseline_network
-from utils import *
-from separation import *
+from vctoolkit import pkl_save
 
 
 class Model:
@@ -30,10 +30,10 @@ class Model:
 def process_folder(src_path, list_path, output_path, model):
   with open(list_path) as f:
     names = f.read().splitlines()
-  gnsdr = [0, 0]
-  gsir = [0, 0]
-  gsar = [0, 0]
-  length = 0
+  gnsdr = 0
+  gsir = 0
+  gsar = 0
+  total_length = 0
   for name in tqdm(names, ncols=100):
     wav, _ = librosa.load(
       os.path.join(src_path, name),
@@ -53,17 +53,22 @@ def process_folder(src_path, list_path, output_path, model):
     wav1_pred = librosa.istft((mag1_pred * np.exp(1.j * phs1)).T, hop_length=8)
     wav2_pred = librosa.istft((mag2_pred * np.exp(1.j * phs2)).T, hop_length=8)
 
-    sdr, sir, sar, _ = bss_eval_sources(wav[0], wav1_pred)
-    gnsdr[0] += sdr
-    gsir[0] += sir
-    gsar[0] += sar
+    length = min([wav1_pred.shape[0], wav[0].shape[0]])
 
-    sdr, sir, sar, _ = bss_eval_sources(wav[0], wav1_pred)
-    gnsdr[1] += sdr
-    gsir[1] += sir
-    gsar[1] += sar
+    wav1_pred = wav1_pred[:length]
+    wav2_pred = wav2_pred[:length]
+    wav = wav[:,:length]
+    mixture = mixture[:length]
 
-    length += wav1_pred.shape[0]
+    sdr, sir, sar, _ = bss_eval_sources(wav, np.array([wav1_pred, wav2_pred]), False)
+    sdr_mixed, _, _, _ = bss_eval_sources(wav, np.array([mixture, mixture]), False)
+    nsdr = sdr - sdr_mixed
+    gnsdr += length * nsdr
+    gsir += length * sir
+    gsar += length * sar
+    total_length += length
+
+    print(gnsdr / total_length, gsir / total_length, gsar / total_length)
 
     librosa.output.write_wav(
       os.path.join(output_path, name.replace('.wav', '_accompanies.wav')),
@@ -83,13 +88,14 @@ def process_folder(src_path, list_path, output_path, model):
 
   for l in [gnsdr, gsir, gsar]:
     for i in range(2):
-      l[i] /= length
+      l[i] /= 200
     l.append((l[0] + l[1]) / 2)
 
-  print('| Type | GNSDR | GSIR | GSAR |')
-  print('| --- | --- | --- | --- |')
-  for i, n in enumerate(['Accompanies', 'Vocal', 'Mean']):
-    print('| %s | %f | %f | %f |' % (n, gnsdr[i], gsir[i], gsar[i]))
+  gnsdr /= total_length
+  gsir /= total_length
+  gsar /= total_length
+  print(gnsdr, gsir. gsar)
+  pkl_save('scores.pkl', (gnsdr, gsir, gsar))
 
 
 def process_folder_example():

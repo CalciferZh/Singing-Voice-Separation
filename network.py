@@ -2,7 +2,9 @@ import tensorflow as tf
 import numpy as np
 from tensorflow.contrib.rnn import GRUCell, MultiRNNCell
 
-from utils import *
+
+def tensor_shape(t):
+  return t.get_shape().as_list()
 
 
 def baseline_network(x, n_layers=3, hidden_size=256):
