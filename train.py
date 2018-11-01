@@ -4,10 +4,11 @@ import time
 
 from data import Reader
 from utils import *
-from network import baseline_network
+from network import *
 
 
-def train_baseline(reader, name, log_root, lrate, momentum=0.9, save_every=100, max_to_keep=100):
+def train_baseline(reader, name, log_root, lrate, momentum=0.9, save_every=100,
+                   max_to_keep=100):
   log_dir = os.path.join(log_root, name)
   if os.path.isdir(log_dir):
     restore = True
@@ -22,11 +23,14 @@ def train_baseline(reader, name, log_root, lrate, momentum=0.9, save_every=100, 
     print('START A NEW MODEL: %s' % name)
   print('=====================================================================')
 
-  x_ph = tf.placeholder(tf.float32, [None, reader.sample_rate * reader.n_seconds / 8 + 1, 513])
+  x_ph = tf.placeholder(
+    tf.float32, [None, reader.sample_rate * reader.n_seconds / 8 + 1, 513]
+  )
   y1_pred, y2_pred = baseline_network(x_ph)
   y1_truth_ph = tf.placeholder(tf.float32, tensor_shape(y1_pred))
   y2_truth_ph = tf.placeholder(tf.float32, tensor_shape(y2_pred))
-  loss = tf.reduce_mean(tf.square(y1_truth_ph - y1_pred) + tf.square(y2_truth_ph - y2_pred))
+  loss = tf.reduce_mean(tf.square(y1_truth_ph - y1_pred) + \
+    tf.square(y2_truth_ph - y2_pred))
   lrate_ph = tf.placeholder(tf.float32, [])
   step_tensor = tf.Variable(0, name='step', trainable=False)
   opt = tf.train.MomentumOptimizer(lrate_ph, momentum)
@@ -75,7 +79,7 @@ if __name__ == '__main__':
   )
   train_baseline(
     reader,
-    'baseline_1e-4_2100_1e-5',
+    'baseline',
     './log',
-    0.00001
+    0.0001
   )

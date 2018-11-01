@@ -60,8 +60,12 @@ def process_folder(src_path, list_path, output_path, model):
     wav = wav[:,:length]
     mixture = mixture[:length]
 
-    sdr, sir, sar, _ = bss_eval_sources(wav, np.array([wav1_pred, wav2_pred]), False)
-    sdr_mixed, _, _, _ = bss_eval_sources(wav, np.array([mixture, mixture]), False)
+    sdr, sir, sar, _ = bss_eval_sources(
+      wav, np.array([wav1_pred, wav2_pred]), False
+    )
+    sdr_mixed, _, _, _ = bss_eval_sources(
+      wav, np.array([mixture, mixture]), False
+    )
     nsdr = sdr - sdr_mixed
     gnsdr += length * nsdr
     gsir += length * sir

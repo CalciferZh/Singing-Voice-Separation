@@ -59,7 +59,9 @@ class Reader:
       wav = sample[1]
       spec1 = np.abs(librosa.stft(wav[0], n_fft=1024, hop_length=8)).T
       spec2 = np.abs(librosa.stft(wav[1], n_fft=1024, hop_length=8)).T
-      mixture = np.abs(librosa.stft(librosa.to_mono(wav), n_fft=1024, hop_length=8))
+      mixture = np.abs(
+        librosa.stft(librosa.to_mono(wav), n_fft=1024, hop_length=8)
+      )
       y1.append(spec1)
       y2.append(spec2)
       x.append(mixture.T)
