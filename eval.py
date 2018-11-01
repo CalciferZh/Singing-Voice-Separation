@@ -90,15 +90,10 @@ def process_folder(src_path, list_path, output_path, model):
       16000
     )
 
-  for l in [gnsdr, gsir, gsar]:
-    for i in range(2):
-      l[i] /= 200
-    l.append((l[0] + l[1]) / 2)
-
   gnsdr /= total_length
   gsir /= total_length
   gsar /= total_length
-  print(gnsdr, gsir. gsar)
+  print(gnsdr, gsir, gsar)
   pkl_save('scores.pkl', (gnsdr, gsir, gsar))
 
 
