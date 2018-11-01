@@ -3,7 +3,6 @@ import os
 import time
 
 from data import Reader
-from utils import *
 from network import *
 
 

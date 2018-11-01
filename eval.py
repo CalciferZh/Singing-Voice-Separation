@@ -2,11 +2,9 @@ import numpy as np
 import librosa
 import tensorflow as tf
 import os
-from tqdm import tqdm
 from mir_eval.separation import bss_eval_sources
 
 from network import baseline_network
-from vctoolkit import pkl_save
 
 
 class Model:
@@ -30,11 +28,9 @@ class Model:
 def process_folder(src_path, list_path, output_path, model):
   with open(list_path) as f:
     names = f.read().splitlines()
-  gnsdr = 0
-  gsir = 0
-  gsar = 0
+  gnsdr = gsir = gsar = np.zeros(2)
   total_length = 0
-  for name in tqdm(names, ncols=100):
+  for name in names:
     wav, _ = librosa.load(
       os.path.join(src_path, name),
       sr=None,
@@ -94,7 +90,6 @@ def process_folder(src_path, list_path, output_path, model):
   gsir /= total_length
   gsar /= total_length
   print(gnsdr, gsir, gsar)
-  pkl_save('scores.pkl', (gnsdr, gsir, gsar))
 
 
 def process_folder_example():
