@@ -140,4 +140,4 @@ def process_single_example():
 
 
 if __name__ == '__main__':
-  process_folder_example()
+  process_single_example()

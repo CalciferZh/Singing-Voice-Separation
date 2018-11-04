@@ -5,6 +5,7 @@ results/
 .vscode/
 *.wav
 *.pkl
+!demo*.wav
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
