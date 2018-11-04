@@ -68,11 +68,3 @@ class Reader:
     y1 = np.array(y1)
     y2 = np.array(y2)
     return x, y1, y2
-
-if __name__ == '__main__':
-  r = Reader(
-    './data/train.txt',
-    './data/wav',
-    16
-  )
-  _, _ = r.next_batch()
