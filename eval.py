@@ -64,7 +64,7 @@ def process_folder(src_path, list_path, output_path, model):
     )
     nsdr = sdr - sdr_mixed
     gnsdr += length * nsdr
-    gsir += length * sir
+    gsir += length * sir / 2
     gsar += length * sar
     total_length += length
 
