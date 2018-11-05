@@ -43,6 +43,6 @@ If you insist to train by yourself, you'll need to:
 
 | Source | GNDSR | GSIR  | GSAR |
 | :--: | :---: | :---: | :--: |
-| Accompanies | 7.78  | 21.36 | 8.11 |
-| Vocal | 7.64  | 20.71 | 8.06 |
+| Accompanies | 7.78  | 10.68 | 8.11 |
+| Vocal | 7.64  | 10.36 | 8.06 |
 
